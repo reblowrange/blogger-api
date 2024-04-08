@@ -20,7 +20,7 @@ import com.blogger.dto.BlogDTO;
 import com.blogger.service.BlogService;
 
 @RestController
-@RequestMapping("/blogs")
+@RequestMapping("/api/blogs")
 public class BlogResource {
 	@Autowired
 	private BlogService blogService;

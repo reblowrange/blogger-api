@@ -19,7 +19,7 @@ import com.blogger.dto.CommentDTO;
 import com.blogger.service.CommentService;
 
 @RestController
-@RequestMapping("/comments")
+@RequestMapping("/api/comments")
 public class CommentResource {
 	@Autowired
 	 private CommentService commentService;
