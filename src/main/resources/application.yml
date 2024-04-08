@@ -1,0 +1,26 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: blogger
+  datasource:
+    url: jdbc:h2:mem:blogger
+    driverClassName: org.h2.Driver
+    username: root
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+logging:
+  level:
+    org.springframework.security: trace
+    
+jwt:
+  rsa-private-key: classpath:certs/privateKey.pem
+  rsa-public-key: classpath:certs/publicKey.pem
