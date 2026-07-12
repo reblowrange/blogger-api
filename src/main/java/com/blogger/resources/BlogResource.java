@@ -25,7 +25,7 @@ public class BlogResource {
 	@Autowired
 	private BlogService blogService;
 
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+//	@PreAuthorize("hasAnyRole('ROLE_BLOGGER')")
 	@PostMapping
 	public ResponseEntity<BlogDTO> createBlog(@RequestBody BlogDTO blog) {
 		BlogDTO createdBlog = blogService.createBlog(blog);

@@ -27,6 +27,6 @@ public class UserRegistrationDto {
 	@NotEmpty(message = "*Please provide your password")
 	private String password;
 	
-	@NotEmpty(message="At leaste one role should be there e.g. 'ROLE_BLOGGER'")
+//	@NotEmpty(message="At leaste one role should be there e.g. 'ROLE_BLOGGER'")
 	private String roles;
 }

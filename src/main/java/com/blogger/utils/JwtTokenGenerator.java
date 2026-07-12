@@ -25,24 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtTokenGenerator {
 	private final JwtEncoder jwtEncoder;
 	 
-    public String generateAccessToken(Authentication authentication) {
 
-        log.info("[JwtTokenGenerator:generateAccessToken] Token Creation Started for:{}", authentication.getName());
-
-        String roles = getRolesOfUser(authentication);
-
-        String permissions = getPermissionsFromRoles(roles);
-
-        JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("atquil")
-                .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plus(15 , ChronoUnit.MINUTES))
-                .subject(authentication.getName())
-                .claim("scope", permissions)
-                .build();
-
-        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
-    }
 
     private static String getRolesOfUser(Authentication authentication) {
         return authentication.getAuthorities().stream()
@@ -67,11 +50,30 @@ public class JwtTokenGenerator {
         log.info("[JwtTokenGenerator:generateRefreshToken] Token Creation Started for:{}", authentication.getName());
         
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("atquil")
+                .issuer("swapnil")
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plus(15 , ChronoUnit.DAYS))
                 .subject(authentication.getName())
                 .claim("scope", "REFRESH_TOKEN")
+                .build();
+
+        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+    }
+    
+    public String generateAccessToken(Authentication authentication) {
+
+        log.info("[JwtTokenGenerator:generateAccessToken] Token Creation Started for:{}", authentication.getName());
+
+        String roles = getRolesOfUser(authentication);
+
+        String permissions = getPermissionsFromRoles(roles);
+
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuer("swapnil")
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plus(15 , ChronoUnit.MINUTES))
+                .subject(authentication.getName())
+                .claim("scope", permissions)
                 .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();

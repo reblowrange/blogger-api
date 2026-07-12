@@ -15,6 +15,7 @@ import com.blogger.dto.AuthResponseDto;
 import com.blogger.dto.UserRegistrationDto;
 import com.blogger.entities.RefreshToken;
 import com.blogger.entities.User;
+import com.blogger.enums.ROLES;
 import com.blogger.repository.RefreshTokenRepository;
 import com.blogger.repository.UserRepository;
 import com.blogger.service.AuthService;
@@ -56,7 +57,10 @@ public class AuthServiceImpl implements AuthService {
             return  AuthResponseDto.builder()
                     .accessToken(accessToken)
                     .accessTokenExpiry(60)
-                    .userName(userInfoEntity.getUsername())
+                    .fullName(userInfoEntity.getFirstName() + " " + userInfoEntity.getLastName())
+                    .username(userInfoEntity.getUsername())
+                    .email(userInfoEntity.getEmail())
+                    .roles(userInfoEntity.getRoles())
                     .tokenType(TokenType.BEARER)
                     .build();
 
@@ -109,7 +113,10 @@ public class AuthServiceImpl implements AuthService {
         return  AuthResponseDto.builder()
                 .accessToken(accessToken)
                 .accessTokenExpiry(5 * 60)
-                .userName(userInfoEntity.getUsername())
+                .fullName(userInfoEntity.getFirstName() + " " + userInfoEntity.getLastName())
+                .username(userInfoEntity.getUsername())
+                .email(userInfoEntity.getEmail())
+                .roles(userInfoEntity.getRoles())
                 .tokenType(TokenType.BEARER)
                 .build();
     }
@@ -125,6 +132,7 @@ public class AuthServiceImpl implements AuthService {
                 throw new Exception("User Already Exist");
             }
 
+            userRegistrationDto.setRoles(ROLES.ROLE_BLOGGER.toString());
             User userDetailsEntity = userMapper.toEntity(userRegistrationDto);
             Authentication authentication = createAuthenticationObject(userDetailsEntity);
 
@@ -142,7 +150,10 @@ public class AuthServiceImpl implements AuthService {
             return   AuthResponseDto.builder()
                     .accessToken(accessToken)
                     .accessTokenExpiry(5 * 60)
-                    .userName(savedUserDetails.getUsername())
+                    .fullName(savedUserDetails.getFirstName() + " " + savedUserDetails.getLastName())
+                    .username(savedUserDetails.getUsername())
+                    .email(savedUserDetails.getEmail())
+                    .roles(savedUserDetails.getRoles())
                     .tokenType(TokenType.BEARER)
                     .build();
 

@@ -1,6 +1,7 @@
 package com.blogger.dto;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.validator.constraints.Length;
@@ -27,5 +28,5 @@ public class BlogDTO {
 	@JsonIgnore
 	private UserRegistrationDto user;
 	
-	private List<CommentDTO> comments;
+	private List<CommentDTO> comments = new ArrayList<>();
 }
