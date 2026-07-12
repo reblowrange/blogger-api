@@ -44,12 +44,13 @@ public class JwtAccessTokenFilter extends OncePerRequestFilter {
             
             final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
             
-            JwtDecoder jwtDecoder =  NimbusJwtDecoder.withPublicKey(rsaKeyRecord.rsaPublicKey()).build();
-
-            if(!authHeader.startsWith(TokenType.BEARER.getValue())){
+            // If no authorization header, pass through (public endpoints)
+            if(authHeader == null || !authHeader.startsWith(TokenType.BEARER.getValue())){
                 filterChain.doFilter(request,response);
                 return;
             }
+            
+            JwtDecoder jwtDecoder =  NimbusJwtDecoder.withPublicKey(rsaKeyRecord.rsaPublicKey()).build();
 
             final String token = authHeader.substring(7);
             final Jwt jwtToken = jwtDecoder.decode(token);

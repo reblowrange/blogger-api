@@ -12,4 +12,6 @@ public interface CommentService {
     List<CommentDTO> findAll();
     void deleteById(Long id);
 	Page<CommentDTO> findComments(int page, int size);
+    CommentDTO saveCommentToBlog(Long blogId, CommentDTO commentDto);
+    List<CommentDTO> findByBlogId(Long blogId);
 }

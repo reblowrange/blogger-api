@@ -14,6 +14,7 @@ import com.blogger.dto.BlogDTO;
 import com.blogger.entities.Blog;
 import com.blogger.entities.User;
 import com.blogger.exception.BlogNotFoundException;
+import com.blogger.exception.UnauthorizedException;
 import com.blogger.repository.BlogRepository;
 import com.blogger.service.BlogService;
 import com.blogger.service.UserContextService;
@@ -53,6 +54,14 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     public void deleteBlog(Long id) {
+        Blog blog = blogRepository.findById(id)
+                .orElseThrow(() -> new BlogNotFoundException("Blog not found with ID: " + id));
+        
+        User currentUser = userContextService.getUser();
+        if (!blog.getUser().getId().equals(currentUser.getId())) {
+            throw new UnauthorizedException("You can only delete your own blogs.");
+        }
+        
         blogRepository.deleteById(id);
     }
     
@@ -61,5 +70,31 @@ public class BlogServiceImpl implements BlogService {
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<Blog> resultPage = blogRepository.findAll(pageRequest);
         return resultPage.map(blogMapper::mapToDTO);
+    }
+
+    @Override
+    public BlogDTO updateBlog(Long id, BlogDTO blogDao) {
+        Blog existing = blogRepository.findById(id)
+                .orElseThrow(() -> new BlogNotFoundException("Blog not found with ID: " + id));
+        
+        User currentUser = userContextService.getUser();
+        if (!existing.getUser().getId().equals(currentUser.getId())) {
+            throw new UnauthorizedException("You can only edit your own blogs.");
+        }
+        
+        existing.setTitle(blogDao.getTitle());
+        existing.setBlog(blogDao.getBlog());
+        return blogMapper.mapToDTO(blogRepository.save(existing));
+    }
+
+    @Override
+    public List<BlogDTO> getBlogsByUsername(String username) {
+        return blogMapper.mapToDTO(blogRepository.findByUserUsername(username));
+    }
+
+    @Override
+    public List<BlogDTO> searchBlogs(String keyword) {
+        return blogMapper.mapToDTO(
+                blogRepository.findByTitleContainingIgnoreCaseOrBlogContainingIgnoreCase(keyword, keyword));
     }
 }

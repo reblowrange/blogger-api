@@ -2,6 +2,8 @@ package com.blogger.dto;
 
 import java.sql.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
@@ -19,9 +21,14 @@ public class CommentDTO {
     @Schema(description = "Creation date", example = "2026-07-12", accessMode = Schema.AccessMode.READ_ONLY)
     private Date createdOn;
 
+    @Schema(description = "Username of the comment creator", example = "swapnil", accessMode = Schema.AccessMode.READ_ONLY)
+    private String createdBy;
+
+    @JsonIgnore
     @Schema(hidden = true)
     private BlogDTO blog;
 
+    @JsonIgnore
     @Schema(hidden = true)
     private UserRegistrationDto user;
 }

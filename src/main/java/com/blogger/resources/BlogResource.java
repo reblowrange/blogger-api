@@ -11,13 +11,16 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.blogger.dto.BlogDTO;
+import com.blogger.dto.CommentDTO;
 import com.blogger.service.BlogService;
+import com.blogger.service.CommentService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,6 +37,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class BlogResource {
 	@Autowired
 	private BlogService blogService;
+	@Autowired
+	private CommentService commentService;
 
 //	@PreAuthorize("hasAnyRole('ROLE_BLOGGER')")
 	@Operation(summary = "Create blog", description = "Creates a new blog post.")
@@ -62,6 +67,20 @@ public class BlogResource {
 	public ResponseEntity<BlogDTO> getBlogById(@Parameter(description = "Blog id", example = "1") @PathVariable Long id) {
 		BlogDTO blog = blogService.getBlogById(id);
 		return ResponseEntity.ok(blog);
+	}
+
+	@Operation(summary = "Update blog", description = "Updates title and content of an existing blog.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Blog updated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BlogDTO.class), examples = @ExampleObject(value = "{\"id\":1,\"title\":\"Updated Title\",\"blog\":\"Updated blog content with more details.\",\"createdOn\":\"2026-07-12\",\"comments\":[]}"))),
+			@ApiResponse(responseCode = "404", description = "Blog not found", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Not Found\",\"message\":\"Blog not found with id: 1\"}"))),
+			@ApiResponse(responseCode = "400", description = "Invalid blog payload", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Bad Request\",\"message\":\"Validation failed for request body\"}"))),
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+	})
+	@PutMapping("/{id}")
+	public ResponseEntity<BlogDTO> updateBlog(
+			@Parameter(description = "Blog id", example = "1") @PathVariable Long id,
+			@RequestBody BlogDTO blog) {
+		return ResponseEntity.ok(blogService.updateBlog(id, blog));
 	}
 
 	@Operation(summary = "Get all blogs", description = "Returns all blogs.")
@@ -98,5 +117,58 @@ public class BlogResource {
 			@Parameter(description = "Page size", example = "10") @RequestParam int size) {
 		Page<BlogDTO> blogPage = blogService.findBlogs(page, size);
 		return ResponseEntity.ok(blogPage);
+	}
+
+	@Operation(summary = "Get blogs by user", description = "Returns all blogs authored by the given username.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Blogs fetched", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BlogDTO.class), examples = @ExampleObject(value = "[{\"id\":1,\"title\":\"Spring Boot Security with JWT\",\"blog\":\"This article explains JWT authentication in Spring Boot with practical examples.\",\"createdOn\":\"2026-07-12\",\"comments\":[]}]"))),
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+	})
+	@GetMapping("/user/{username}")
+	public ResponseEntity<List<BlogDTO>> getBlogsByUsername(
+			@Parameter(description = "Username", example = "alexj") @PathVariable String username) {
+		return ResponseEntity.ok(blogService.getBlogsByUsername(username));
+	}
+
+	@Operation(summary = "Search blogs", description = "Returns blogs whose title or content contains the keyword (case-insensitive).")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Search results", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BlogDTO.class), examples = @ExampleObject(value = "[{\"id\":1,\"title\":\"Spring Boot Security with JWT\",\"blog\":\"This article explains JWT authentication in Spring Boot with practical examples.\",\"createdOn\":\"2026-07-12\",\"comments\":[]}]"))),
+			@ApiResponse(responseCode = "400", description = "Missing query parameter", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Bad Request\",\"message\":\"Required parameter 'q' is missing\"}"))),
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+	})
+	@GetMapping("/search")
+	public ResponseEntity<List<BlogDTO>> searchBlogs(
+			@Parameter(description = "Search keyword", example = "JWT") @RequestParam String q) {
+		return ResponseEntity.ok(blogService.searchBlogs(q));
+	}
+
+	@Operation(summary = "Create comment on a blog", description = "Creates a new comment on a specific blog.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "201", description = "Comment created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommentDTO.class), examples = @ExampleObject(value = "{\"id\":10,\"comment\":\"Great post. The JWT filter flow is very clear.\",\"createdBy\":\"swapnil\",\"createdOn\":\"2026-07-12\"}"))),
+			@ApiResponse(responseCode = "400", description = "Invalid comment payload", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Bad Request\",\"message\":\"Validation failed for request body\"}"))),
+			@ApiResponse(responseCode = "404", description = "Blog not found", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Not Found\",\"message\":\"Blog not found with id: 1\"}"))),
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+	})
+	@PostMapping("/{blogId}/comments")
+	public ResponseEntity<CommentDTO> createCommentOnBlog(
+			@Parameter(description = "Blog ID", example = "1") @PathVariable Long blogId,
+			@RequestBody @io.swagger.v3.oas.annotations.parameters.RequestBody(
+					required = true,
+					description = "Comment payload",
+					content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommentDTO.class), examples = @ExampleObject(value = "{\"comment\":\"Great post. The JWT filter flow is very clear.\"}"))
+			) CommentDTO comment) {
+		return ResponseEntity.status(HttpStatus.CREATED).body(commentService.saveCommentToBlog(blogId, comment));
+	}
+
+	@Operation(summary = "Get comments for a blog", description = "Returns all comments for a specific blog.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Comments fetched", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommentDTO.class), examples = @ExampleObject(value = "[{\"id\":10,\"comment\":\"Great post. The JWT filter flow is very clear.\",\"createdBy\":\"swapnil\",\"createdOn\":\"2026-07-12\"}]"))),
+			@ApiResponse(responseCode = "404", description = "Blog not found", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Not Found\",\"message\":\"Blog not found with id: 1\"}"))),
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+	})
+	@GetMapping("/{blogId}/comments")
+	public ResponseEntity<List<CommentDTO>> getCommentsByBlog(
+			@Parameter(description = "Blog ID", example = "1") @PathVariable Long blogId) {
+		return ResponseEntity.ok(commentService.findByBlogId(blogId));
 	}
 }

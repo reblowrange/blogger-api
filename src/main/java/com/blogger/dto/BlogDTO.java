@@ -31,6 +31,9 @@ public class BlogDTO {
 	@Schema(description = "Creation date", example = "2026-07-12", accessMode = Schema.AccessMode.READ_ONLY)
 	private Date createdOn;
 
+	@Schema(description = "Username of the blog creator", example = "swapnil", accessMode = Schema.AccessMode.READ_ONLY)
+	private String createdBy;
+
 	@JsonIgnore
 	@Schema(hidden = true)
 	private UserRegistrationDto user;

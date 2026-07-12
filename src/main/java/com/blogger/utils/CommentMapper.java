@@ -18,7 +18,11 @@ public class CommentMapper {
 	    }
 
 	    public CommentDTO mapToDTO(Comment comment) {
-	        return modelMapper.map(comment, CommentDTO.class);
+	        CommentDTO commentDTO = modelMapper.map(comment, CommentDTO.class);
+	        if (comment.getUser() != null) {
+	            commentDTO.setCreatedBy(comment.getUser().getUsername());
+	        }
+	        return commentDTO;
 	    }
 
 	    public Comment mapToEntity(CommentDTO commentDTO) {
@@ -27,6 +31,11 @@ public class CommentMapper {
 	    
 		public List<CommentDTO> mapToDTO(List<Comment> comments) {
 	        List<CommentDTO> commentDtos = modelMapper.map(comments, new TypeToken<List<CommentDTO>>() {}.getType());
+	        for (int i = 0; i < comments.size(); i++) {
+	            if (comments.get(i).getUser() != null) {
+	                commentDtos.get(i).setCreatedBy(comments.get(i).getUser().getUsername());
+	            }
+	        }
 	        return commentDtos;
 		}
 }

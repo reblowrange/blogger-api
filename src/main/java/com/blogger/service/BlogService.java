@@ -12,4 +12,7 @@ public interface BlogService {
     List<BlogDTO> getAllBlogs();
     void deleteBlog(Long id);
 	Page<BlogDTO> findBlogs(int page, int size);
+    BlogDTO updateBlog(Long id, BlogDTO blog);
+    List<BlogDTO> getBlogsByUsername(String username);
+    List<BlogDTO> searchBlogs(String keyword);
 }

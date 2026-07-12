@@ -25,15 +25,15 @@ public class InitialDefaultUser implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         User admin = new User();
-        admin.setUsername("Admin");
-        admin.setFirstName("Admin");
-        admin.setLastName("AdminLast");
+        admin.setUsername("swapnil");
+        admin.setFirstName("Swapnil");
+        admin.setLastName("Sonkusare");
         admin.setPassword(passwordEncoder.encode("password"));
-        admin.setRoles(ROLES.ROLE_ADMIN.toString());
-        admin.setEmail("admin@admin.com");
+        admin.setRoles(ROLES.ROLE_BLOGGER.toString());
+        admin.setEmail("swapnil@sonkusare.com");
 
         User user = new User();
-        user.setUsername("User");
+        user.setUsername("user");
         user.setFirstName("User");
         user.setLastName("UserLast");
         user.setPassword(passwordEncoder.encode("password"));
