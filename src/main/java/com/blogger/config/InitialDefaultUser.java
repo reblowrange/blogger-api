@@ -26,12 +26,16 @@ public class InitialDefaultUser implements CommandLineRunner {
 
         User admin = new User();
         admin.setUsername("Admin");
+        admin.setFirstName("Admin");
+        admin.setLastName("AdminLast");
         admin.setPassword(passwordEncoder.encode("password"));
         admin.setRoles(ROLES.ROLE_ADMIN.toString());
         admin.setEmail("admin@admin.com");
 
         User user = new User();
         user.setUsername("User");
+        user.setFirstName("User");
+        user.setLastName("UserLast");
         user.setPassword(passwordEncoder.encode("password"));
         user.setRoles(ROLES.ROLE_BLOGGER.toString());
         user.setEmail("user@user.com");

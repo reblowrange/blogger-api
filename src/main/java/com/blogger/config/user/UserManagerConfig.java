@@ -18,9 +18,12 @@ public class UserManagerConfig implements UserDetailsService {
 	private final UserService userService;
 
 	@Override
-	public UserDetails loadUserByUsername(String emailId) throws UsernameNotFoundException {
-		Optional<User> user = userService.findByEmail(emailId);
+	public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
+		Optional<User> user = userService.findByEmail(usernameOrEmail);
+		if (user.isEmpty()) {
+			user = userService.findByUsername(usernameOrEmail);
+		}
 		return user.map(UserDetailsConfig::new)
-				.orElseThrow(() -> new UsernameNotFoundException("UserEmail: " + emailId + " does not exist"));
+				.orElseThrow(() -> new UsernameNotFoundException("User: " + usernameOrEmail + " does not exist"));
 	}
 }
