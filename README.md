@@ -49,8 +49,8 @@ On startup, two users are seeded automatically:
 
 | Role | Email | Username | Password |
 |---|---|---|---|
-| ADMIN | `admin@admin.com` | Admin | `password` |
-| BLOGGER | `user@user.com` | User | `password` |
+| BLOGGER | `swapnil@sonkusare.com` | swapnil | `password` |
+| BLOGGER | `user@user.com` | user | `password` |
 
 ### Useful URLs
 
@@ -69,7 +69,7 @@ H2 Console connection: JDBC URL = `jdbc:h2:mem:blogger`, User = `root`, Password
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
 | `POST` | `/sign-up` | None | Register a new user |
-| `POST` | `/sign-in` | Basic Auth | Sign in and receive JWT tokens |
+| `POST` | `/sign-in/username-password` | None | Sign in with username and password (JSON body) |
 | `POST` | `/refresh-token` | Bearer (refresh token) | Get a new access token |
 | `POST` | `/logout` | Bearer (access token) | Revoke refresh token and logout |
 
@@ -78,25 +78,34 @@ H2 Console connection: JDBC URL = `jdbc:h2:mem:blogger`, User = `root`, Password
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
 | `POST` | `/api/blogs` | Bearer | Create a blog post |
-| `GET` | `/api/blogs` | None | Get all blogs with comments |
-| `GET` | `/api/blogs/{id}` | None | Get a blog by ID |
+| `GET` | `/api/blogs` | None | Get all blogs |
+| `GET` | `/api/blogs/{id}` | Bearer | Get a blog by ID |
+| `PUT` | `/api/blogs/{id}` | Bearer | Update a blog post |
 | `DELETE` | `/api/blogs/{id}` | Bearer | Delete a blog (cascades to comments) |
-| `GET` | `/api/blogs/paged?page=0&size=10` | Bearer | Get paginated blogs |
+| `GET` | `/api/blogs/paged?page=0&size=10` | None | Get paginated blogs |
+| `GET` | `/api/blogs/user/{username}` | None | Get blogs by username |
+| `GET` | `/api/blogs/search?q=keyword` | None | Search blogs by title or content |
 
 ### Comments
 
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
-| `POST` | `/api/comments` | Bearer | Add a comment to a blog |
-| `GET` | `/api/comments` | Bearer | Get all comments |
+| `POST` | `/api/blogs/{blogId}/comments` | Bearer | Add a comment to a blog |
+| `GET` | `/api/blogs/{blogId}/comments` | Bearer | Get all comments for a blog |
 | `GET` | `/api/comments/{id}` | Bearer | Get a comment by ID |
 | `DELETE` | `/api/comments/{id}` | Bearer | Delete a comment |
-| `GET` | `/api/comments/paged?page=0&size=10` | Bearer | Get paginated comments |
+
+### User Profile
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/user/profile` | Bearer | Get current user profile |
+| `PUT` | `/api/user/profile` | Bearer | Update current user profile |
 
 ## Authentication Flow
 
 1. **Register** — `POST /sign-up` with user details. Returns access and refresh tokens.
-2. **Sign In** — `POST /sign-in` with Basic Auth (email + password). Returns tokens; refresh token also set as an HttpOnly cookie.
+2. **Sign In** — `POST /sign-in/username-password` with JSON body (`username` + `password`). Returns tokens; refresh token also set as an HttpOnly cookie.
 3. **Access API** — Include `Authorization: Bearer <access_token>` header on protected requests.
 4. **Refresh** — When the access token expires (15 min), call `POST /refresh-token` with the refresh token to get a new access token.
 5. **Logout** — `POST /logout` revokes the refresh token in the database.
@@ -156,7 +165,7 @@ Response:
 ```json
 {
   "access_token": "eyJhbGciOi...",
-  "access_token_expiry": 900,
+  "access_token_expiry": 300,
   "token_type": "Bearer",
   "full_name": "John Doe",
   "username": "johndoe",
@@ -181,13 +190,12 @@ Content-Type: application/json
 ### Add Comment
 
 ```http
-POST /api/comments
+POST /api/blogs/1/comments
 Authorization: Bearer <access_token>
 Content-Type: application/json
 
 {
-  "comment": "Great post!",
-  "blog": { "id": 1 }
+  "comment": "Great post!"
 }
 ```
 
