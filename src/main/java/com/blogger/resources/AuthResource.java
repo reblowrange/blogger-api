@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.blogger.dto.ApiErrorResponse;
 import com.blogger.dto.UsernameNPasswordRequestDto;
 import com.blogger.dto.UserRegistrationDto;
 import com.blogger.service.AuthService;
@@ -44,8 +45,8 @@ public class AuthResource {
     @Operation(summary = "Sign in", description = "Authenticates user and returns JWT response.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Authenticated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = com.blogger.dto.AuthResponseDto.class), examples = @ExampleObject(value = "{\"access_token\":\"eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhbGV4aiJ9.signature\",\"access_token_expiry\":300,\"token_type\":\"Bearer\",\"full_name\":\"Alex Johnson\",\"username\":\"alexj\",\"email\":\"alex.johnson@example.com\",\"roles\":\"ROLE_BLOGGER\"}"))),
-        @ApiResponse(responseCode = "401", description = "Authentication failed", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Unauthorized\",\"message\":\"Invalid username or password\"}"))),
-        @ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+        @ApiResponse(responseCode = "401", description = "Authentication failed", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+        @ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
     })
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             required = true,
@@ -64,9 +65,9 @@ public class AuthResource {
     @Operation(summary = "Refresh access token", description = "Generates a new access token using a valid refresh token.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Access token refreshed", content = @Content(mediaType = "application/json", schema = @Schema(implementation = com.blogger.dto.AuthResponseDto.class), examples = @ExampleObject(value = "{\"access_token\":\"eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhbGV4aiJ9.signature\",\"access_token_expiry\":300,\"token_type\":\"Bearer\",\"full_name\":\"Alex Johnson\",\"username\":\"alexj\",\"email\":\"alex.johnson@example.com\",\"roles\":\"ROLE_BLOGGER\"}"))),
-        @ApiResponse(responseCode = "401", description = "Refresh token is missing or invalid", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Unauthorized\",\"message\":\"Invalid refresh token\"}"))),
-        @ApiResponse(responseCode = "403", description = "Insufficient scope", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Forbidden\",\"message\":\"Required scope: SCOPE_REFRESH_TOKEN\"}"))),
-        @ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+        @ApiResponse(responseCode = "401", description = "Refresh token is missing or invalid", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+        @ApiResponse(responseCode = "403", description = "Insufficient scope", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+        @ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
     })
     @PreAuthorize("hasAuthority('SCOPE_REFRESH_TOKEN')")
     @PostMapping ("/refresh-token")
@@ -78,7 +79,7 @@ public class AuthResource {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "User registered successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = com.blogger.dto.AuthResponseDto.class), examples = @ExampleObject(value = "{\"access_token\":\"eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhbGV4aiJ9.signature\",\"access_token_expiry\":300,\"token_type\":\"Bearer\",\"full_name\":\"Alex Johnson\",\"username\":\"alexj\",\"email\":\"alex.johnson@example.com\",\"roles\":\"ROLE_BLOGGER\"}"))),
         @ApiResponse(responseCode = "400", description = "Validation failed", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "[\"*Please provide your name\",\"*Your username must have at least 5 characters\"]"))),
-        @ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+        @ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
     })
     @PostMapping("/sign-up")
     public ResponseEntity<?> registerUser(@Valid @RequestBody @io.swagger.v3.oas.annotations.parameters.RequestBody(

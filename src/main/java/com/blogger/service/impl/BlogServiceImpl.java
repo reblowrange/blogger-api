@@ -43,7 +43,7 @@ public class BlogServiceImpl implements BlogService {
     @Override
     public BlogDTO getBlogById(Long id) {
         Blog comment = blogRepository.findById(id)
-                .orElseThrow(() -> new BlogNotFoundException("Comment not found with ID: " + id));
+                .orElseThrow(() -> new BlogNotFoundException("Blog not found with ID: " + id));
         return blogMapper.mapToDTO(comment);
     }
 

@@ -3,11 +3,14 @@ package com.blogger.config;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
@@ -37,6 +40,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.blogger.config.jwt.JwtAccessTokenFilter;
 import com.blogger.config.jwt.JwtTokenUtils;
 import com.blogger.config.user.UserManagerConfig;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -58,6 +62,7 @@ public class SecurityConfig extends SecurityConfigurerAdapter<DefaultSecurityFil
     private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
     private final LogoutHandler logoutHandlerService;
+    private final ObjectMapper objectMapper;
     
     @Order(1)
     @Bean
@@ -70,8 +75,18 @@ public class SecurityConfig extends SecurityConfigurerAdapter<DefaultSecurityFil
                 .userDetailsService(userManagerConfig)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> {
-                    ex.authenticationEntryPoint((request, response, authException) ->
-                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage()));
+                    ex.authenticationEntryPoint((request, response, authException) -> {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+                        Map<String, Object> body = new LinkedHashMap<>();
+                        body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+                        body.put("error", "Unauthorized");
+                        body.put("message", "Invalid username or password");
+                        body.put("path", request.getRequestURI());
+
+                        response.getWriter().write(objectMapper.writeValueAsString(body));
+                    });
                 })
                 .httpBasic(withDefaults())
                 .build();

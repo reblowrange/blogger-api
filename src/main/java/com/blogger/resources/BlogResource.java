@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.blogger.dto.ApiErrorResponse;
 import com.blogger.dto.BlogDTO;
 import com.blogger.dto.CommentDTO;
 import com.blogger.service.BlogService;
@@ -30,6 +31,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/blogs")
@@ -44,15 +46,15 @@ public class BlogResource {
 	@Operation(summary = "Create blog", description = "Creates a new blog post.")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "201", description = "Blog created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BlogDTO.class), examples = @ExampleObject(value = "{\"id\":1,\"title\":\"Spring Boot Security with JWT\",\"blog\":\"This article explains JWT authentication in Spring Boot with practical examples.\",\"createdOn\":\"2026-07-12\",\"comments\":[]}"))),
-			@ApiResponse(responseCode = "400", description = "Invalid blog payload", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Bad Request\",\"message\":\"Validation failed for request body\"}"))),
-			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+			@ApiResponse(responseCode = "400", description = "Invalid blog payload", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
 	})
 	@PostMapping
 	public ResponseEntity<BlogDTO> createBlog(@RequestBody @io.swagger.v3.oas.annotations.parameters.RequestBody(
 			required = true,
 			description = "Blog payload",
 			content = @Content(mediaType = "application/json", schema = @Schema(implementation = BlogDTO.class), examples = @ExampleObject(value = "{\"title\":\"Spring Boot Security with JWT\",\"blog\":\"This article explains JWT authentication in Spring Boot with practical examples.\"}"))
-	) BlogDTO blog) {
+	) @Valid BlogDTO blog) {
 		BlogDTO createdBlog = blogService.createBlog(blog);
 		return ResponseEntity.status(HttpStatus.CREATED).body(createdBlog);
 	}
@@ -60,8 +62,8 @@ public class BlogResource {
 	@Operation(summary = "Get blog by id", description = "Fetches a single blog by id.")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Blog found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BlogDTO.class), examples = @ExampleObject(value = "{\"id\":1,\"title\":\"Spring Boot Security with JWT\",\"blog\":\"This article explains JWT authentication in Spring Boot with practical examples.\",\"createdOn\":\"2026-07-12\",\"comments\":[]}"))),
-			@ApiResponse(responseCode = "404", description = "Blog not found", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Not Found\",\"message\":\"Blog not found with id: 1\"}"))),
-			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+			@ApiResponse(responseCode = "404", description = "Blog not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
 	})
 	@GetMapping("/{id}")
 	public ResponseEntity<BlogDTO> getBlogById(@Parameter(description = "Blog id", example = "1") @PathVariable Long id) {
@@ -72,21 +74,21 @@ public class BlogResource {
 	@Operation(summary = "Update blog", description = "Updates title and content of an existing blog.")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Blog updated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BlogDTO.class), examples = @ExampleObject(value = "{\"id\":1,\"title\":\"Updated Title\",\"blog\":\"Updated blog content with more details.\",\"createdOn\":\"2026-07-12\",\"comments\":[]}"))),
-			@ApiResponse(responseCode = "404", description = "Blog not found", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Not Found\",\"message\":\"Blog not found with id: 1\"}"))),
-			@ApiResponse(responseCode = "400", description = "Invalid blog payload", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Bad Request\",\"message\":\"Validation failed for request body\"}"))),
-			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+			@ApiResponse(responseCode = "404", description = "Blog not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+			@ApiResponse(responseCode = "400", description = "Invalid blog payload", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
 	})
 	@PutMapping("/{id}")
 	public ResponseEntity<BlogDTO> updateBlog(
 			@Parameter(description = "Blog id", example = "1") @PathVariable Long id,
-			@RequestBody BlogDTO blog) {
+			@RequestBody @Valid BlogDTO blog) {
 		return ResponseEntity.ok(blogService.updateBlog(id, blog));
 	}
 
 	@Operation(summary = "Get all blogs", description = "Returns all blogs.")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Blogs fetched", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BlogDTO.class), examples = @ExampleObject(value = "[{\"id\":1,\"title\":\"Spring Boot Security with JWT\",\"blog\":\"This article explains JWT authentication in Spring Boot with practical examples.\",\"createdOn\":\"2026-07-12\",\"comments\":[]}]"))),
-			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
 	})
 	@GetMapping
 	public ResponseEntity<List<BlogDTO>> getAllBlogs() {
@@ -97,8 +99,8 @@ public class BlogResource {
 	@Operation(summary = "Delete blog", description = "Deletes a blog by id.")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "204", description = "Blog deleted", content = @Content),
-			@ApiResponse(responseCode = "404", description = "Blog not found", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Not Found\",\"message\":\"Blog not found with id: 1\"}"))),
-			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+			@ApiResponse(responseCode = "404", description = "Blog not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
 	})
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteBlog(@Parameter(description = "Blog id", example = "1") @PathVariable Long id) {
@@ -109,8 +111,8 @@ public class BlogResource {
 	@Operation(summary = "Get paged blogs", description = "Returns blogs in paginated format.")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Paged blogs fetched", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"content\":[{\"id\":1,\"title\":\"Spring Boot Security with JWT\",\"blog\":\"This article explains JWT authentication in Spring Boot with practical examples.\",\"createdOn\":\"2026-07-12\",\"comments\":[]}],\"pageable\":{\"pageNumber\":0,\"pageSize\":10},\"totalElements\":1,\"totalPages\":1,\"last\":true,\"first\":true,\"numberOfElements\":1,\"size\":10,\"number\":0,\"empty\":false}"))),
-			@ApiResponse(responseCode = "400", description = "Invalid paging parameters", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Bad Request\",\"message\":\"page and size must be positive integers\"}"))),
-			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+			@ApiResponse(responseCode = "400", description = "Invalid paging parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
 	})
 	@GetMapping("/paged")
 	public ResponseEntity<Page<BlogDTO>> findBlogs(@Parameter(description = "Zero-based page index", example = "0") @RequestParam int page,
@@ -122,7 +124,7 @@ public class BlogResource {
 	@Operation(summary = "Get blogs by user", description = "Returns all blogs authored by the given username.")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Blogs fetched", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BlogDTO.class), examples = @ExampleObject(value = "[{\"id\":1,\"title\":\"Spring Boot Security with JWT\",\"blog\":\"This article explains JWT authentication in Spring Boot with practical examples.\",\"createdOn\":\"2026-07-12\",\"comments\":[]}]"))),
-			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
 	})
 	@GetMapping("/user/{username}")
 	public ResponseEntity<List<BlogDTO>> getBlogsByUsername(
@@ -133,8 +135,8 @@ public class BlogResource {
 	@Operation(summary = "Search blogs", description = "Returns blogs whose title or content contains the keyword (case-insensitive).")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Search results", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BlogDTO.class), examples = @ExampleObject(value = "[{\"id\":1,\"title\":\"Spring Boot Security with JWT\",\"blog\":\"This article explains JWT authentication in Spring Boot with practical examples.\",\"createdOn\":\"2026-07-12\",\"comments\":[]}]"))),
-			@ApiResponse(responseCode = "400", description = "Missing query parameter", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Bad Request\",\"message\":\"Required parameter 'q' is missing\"}"))),
-			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+			@ApiResponse(responseCode = "400", description = "Missing query parameter", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
 	})
 	@GetMapping("/search")
 	public ResponseEntity<List<BlogDTO>> searchBlogs(
@@ -145,9 +147,9 @@ public class BlogResource {
 	@Operation(summary = "Create comment on a blog", description = "Creates a new comment on a specific blog.")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "201", description = "Comment created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommentDTO.class), examples = @ExampleObject(value = "{\"id\":10,\"comment\":\"Great post. The JWT filter flow is very clear.\",\"createdBy\":\"swapnil\",\"createdOn\":\"2026-07-12\"}"))),
-			@ApiResponse(responseCode = "400", description = "Invalid comment payload", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Bad Request\",\"message\":\"Validation failed for request body\"}"))),
-			@ApiResponse(responseCode = "404", description = "Blog not found", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Not Found\",\"message\":\"Blog not found with id: 1\"}"))),
-			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+			@ApiResponse(responseCode = "400", description = "Invalid comment payload", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+			@ApiResponse(responseCode = "404", description = "Blog not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
 	})
 	@PostMapping("/{blogId}/comments")
 	public ResponseEntity<CommentDTO> createCommentOnBlog(
@@ -156,15 +158,15 @@ public class BlogResource {
 					required = true,
 					description = "Comment payload",
 					content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommentDTO.class), examples = @ExampleObject(value = "{\"comment\":\"Great post. The JWT filter flow is very clear.\"}"))
-			) CommentDTO comment) {
+			) @Valid CommentDTO comment) {
 		return ResponseEntity.status(HttpStatus.CREATED).body(commentService.saveCommentToBlog(blogId, comment));
 	}
 
 	@Operation(summary = "Get comments for a blog", description = "Returns all comments for a specific blog.")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Comments fetched", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommentDTO.class), examples = @ExampleObject(value = "[{\"id\":10,\"comment\":\"Great post. The JWT filter flow is very clear.\",\"createdBy\":\"swapnil\",\"createdOn\":\"2026-07-12\"}]"))),
-			@ApiResponse(responseCode = "404", description = "Blog not found", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Not Found\",\"message\":\"Blog not found with id: 1\"}"))),
-			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+			@ApiResponse(responseCode = "404", description = "Blog not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
 	})
 	@GetMapping("/{blogId}/comments")
 	public ResponseEntity<List<CommentDTO>> getCommentsByBlog(

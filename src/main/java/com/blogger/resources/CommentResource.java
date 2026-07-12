@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.blogger.dto.ApiErrorResponse;
 import com.blogger.dto.CommentDTO;
 import com.blogger.service.CommentService;
 
@@ -31,8 +32,8 @@ public class CommentResource {
 	@Operation(summary = "Get comment by id", description = "Fetches a single comment by id.")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Comment found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommentDTO.class), examples = @ExampleObject(value = "{\"id\":10,\"comment\":\"Great post. The JWT filter flow is very clear.\",\"createdBy\":\"swapnil\",\"createdOn\":\"2026-07-12\"}"))),
-			@ApiResponse(responseCode = "404", description = "Comment not found", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Not Found\",\"message\":\"Comment not found with id: 10\"}"))),
-			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+			@ApiResponse(responseCode = "404", description = "Comment not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
 	})
 	@GetMapping("/{id}")
 	public ResponseEntity<CommentDTO> getCommentById(@Parameter(description = "Comment id", example = "10") @PathVariable Long id) {
@@ -40,12 +41,12 @@ public class CommentResource {
 		return ResponseEntity.ok(comment);
 	}
 
-	    @Operation(summary = "Delete comment", description = "Deletes a comment by id. Only the comment owner can delete their comment.")
+	    @Operation(summary = "Delete comment", description = "Deletes a comment by id.")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "204", description = "Comment deleted", content = @Content),
-			@ApiResponse(responseCode = "403", description = "Forbidden - only owner can delete", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Forbidden\",\"message\":\"You can only delete your own comments\"}"))),
-			@ApiResponse(responseCode = "404", description = "Comment not found", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Not Found\",\"message\":\"Comment not found with id: 10\"}"))),
-			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+			@ApiResponse(responseCode = "403", description = "Forbidden - only owner can delete", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+			@ApiResponse(responseCode = "404", description = "Comment not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+			@ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
 	})
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteComment(@Parameter(description = "Comment id", example = "10") @PathVariable Long id) {

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.blogger.dto.ApiErrorResponse;
 import com.blogger.dto.UserProfileDto;
 import com.blogger.service.UserService;
 
@@ -31,8 +32,8 @@ public class UserResource {
     @Operation(summary = "Get current user profile", description = "Returns the profile of the authenticated user.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Profile fetched", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserProfileDto.class), examples = @ExampleObject(value = "{\"firstName\":\"Alex\",\"lastName\":\"Johnson\",\"email\":\"alex.johnson@example.com\",\"username\":\"alexj\",\"roles\":\"ROLE_BLOGGER\"}"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Unauthorized\",\"message\":\"Authentication required\"}"))),
-            @ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
     })
     @GetMapping("/profile")
     public ResponseEntity<UserProfileDto> getProfile() {
@@ -42,9 +43,9 @@ public class UserResource {
     @Operation(summary = "Update current user profile", description = "Updates firstName, lastName, and email of the authenticated user.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Profile updated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserProfileDto.class), examples = @ExampleObject(value = "{\"firstName\":\"Alexander\",\"lastName\":\"Johnson\",\"email\":\"alex.johnson@example.com\",\"username\":\"alexj\",\"roles\":\"ROLE_BLOGGER\"}"))),
-            @ApiResponse(responseCode = "400", description = "Validation failed", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Bad Request\",\"message\":\"Validation failed for request body\"}"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = "{\"error\":\"Unauthorized\",\"message\":\"Authentication required\"}"))),
-            @ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "An error occurred: <details>")))
+                @ApiResponse(responseCode = "400", description = "Validation failed", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+                @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class))),
+                @ApiResponse(responseCode = "500", description = "Server error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiErrorResponse.class)))
     })
     @PutMapping("/profile")
     public ResponseEntity<UserProfileDto> updateProfile(
