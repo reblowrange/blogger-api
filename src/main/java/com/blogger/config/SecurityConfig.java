@@ -111,6 +111,7 @@ public class SecurityConfig extends SecurityConfigurerAdapter<DefaultSecurityFil
                         .requestMatchers(new AntPathRequestMatcher("/api/blogs/paged", HttpMethod.GET.name())).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/blogs/search", HttpMethod.GET.name())).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/blogs/user/**", HttpMethod.GET.name())).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/blogs/**", HttpMethod.GET.name())).permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
